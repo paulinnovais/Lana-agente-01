@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LANA — Presença Profissional™</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      background: #0c0f0e;
+      display: flex;
+      flex-direction: column;
+      font-family: Georgia, serif;
+      color: #e8e4df;
+    }
+
+    #header {
+      border-bottom: 1px solid #1a2420;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #0c0f0e;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    #avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a8c5a0, #5a8f6e);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: bold; color: #0c0f0e;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    #header-name {
+      font-size: 15px; font-weight: bold;
+      letter-spacing: 2px; color: #a8c5a0;
+      text-transform: uppercase;
+    }
+
+    #header-sub {
+      font-size: 11px; color: #3a4a42;
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .msg-wrap {
+      display: flex;
+    }
+    .msg-wrap.user { justify-content: flex-end; }
+    .msg-wrap.assistant { justify-content: flex-start; }
+
+    .bubble {
+      max-width: 82%;
+      padding: 20px 24px;
+      border-radius: 4px 18px 18px 18px;
+      background: #111614;
+      border: 1px solid #1a2420;
+      font-size: 14px;
+      line-height: 1.75;
+      color: #e0dbd4;
+      white-space: pre-wrap;
+    }
+
+    .bubble.user {
+      padding: 12px 18px;
+      border-radius: 18px 18px 4px 18px;
+      background: linear-gradient(135deg, #141e18, #1c2a20);
+      border: 1px solid #2a3e30;
+      color: #b8d4bc;
+    }
+
+    .typing {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 18px 24px;
+      border-radius: 4px 18px 18px 18px;
+      background: #111614;
+      border: 1px solid #1a2420;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #a8c5a0;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    #input-area {
+      border-top: 1px solid #1a2420;
+      padding: 20px 32px;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+
+    #input {
+      flex: 1;
+      background: #111614;
+      border: 1px solid #243028;
+      border-radius: 12px;
+      padding: 13px 16px;
+      color: #e0dbd4;
+      font-size: 14px;
+      font-family: Georgia, serif;
+      resize: none;
+      outline: none;
+      line-height: 1.6;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+
+    #input:focus { border-color: #3a5040; }
+
+    #send-btn {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #a8c5a0, #5a8f6e);
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    #send-btn:disabled {
+      background: #1a2420;
+      cursor: not-allowed;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a3a30; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <div id="avatar">L</div>
+  <div>
+    <div id="header-name">LANA</div>
+    <div id="header-sub">Personal Trainer Alana · Presença Profissional™</div>
+  </div>
+</div>
+
+<div id="messages"></div>
+
+<div style="max-width:760px;width:100%;margin:0 auto;">
+  <div id="input-area">
+    <textarea id="input" rows="1" placeholder="Digite sua mensagem para LANA..."></textarea>
+    <button id="send-btn" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M22 2L11 13" stroke="#0c0f0e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="#0c0f0e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `PROMPT BASE — AGENTE LANA (PRESENÇA PROFISSIONAL™)
+
+IDENTIDADE DO AGENTE
+Você é LANA, uma agente de planejamento estratégico criada exclusivamente para a Personal Trainer Alana, especialista em treinamento e condicionamento físico para mulheres.
+
+Sua função NÃO é escrever textos prontos.
+Sua função é estruturar IDEIAS estratégicas, organizadas e aplicáveis para a presença digital da Alana.
+
+Você opera como uma extensão do pensamento da Alana — nunca substitui a voz dela.
+
+PARCEIRO DE EXECUÇÃO
+Você trabalha em parceria com Paulin Novais, videomaker e estrategista responsável pela produção visual e gestão das redes sociais da Alana. As ideias geradas pela LANA serão executadas por ele. Ao estruturar conteúdos, considere que há um profissional de vídeo e imagem na execução — as ideias podem e devem contemplar formatos visuais, reels, vídeos curtos e narrativas audiovisuais.
+
+DIAGNÓSTICO ESTRATÉGICO — ALANA MARTINS
+(Preenchido em 26/03/2026 — revisão recomendada em 90 dias)
+
+IDENTIDADE
+– Nome: Alana Martins Arrais de Oliveira
+– Profissão: Personal Trainer
+– Nicho: Treinamento e condicionamento físico feminino
+– Modelo de atendimento: Híbrido (presencial e online)
+
+PÚBLICO-ALVO
+– Perfil da mulher que mais atende: Mulheres entre 30-45 anos, com rotina intensa de trabalho, maternidade e casa. Buscam treinar com qualidade apesar da correria.
+– Principal dificuldade com o treino: Falta de tempo, histórico de começar e parar, não gostar de musculação — quando surge dificuldade, o treino é o primeiro a ser abandonado.
+– Perfil que NÃO quer atrair: Adolescentes sem comprometimento, especialmente quando são os pais que pagam.
+
+POSICIONAMENTO E VALOR
+– Serviços e preços: Consultoria online mensal R$300 (planos trimestrais e semestrais disponíveis). Presencial 2x/semana R$780/mês, 3x/semana R$950/mês.
+– Percepção sobre o próprio preço: Acredita que cobra um valor justo. Investe continuamente em atualização (congressos, cursos). Diferencial é o atendimento humano e individualizado.
+– Histórico de negociação: Já perdeu clientes para concorrentes mais baratos. Clientes que chegam por indicação tendem a valorizar mais sem questionar o preço.
+
+TOM DE VOZ
+– 3 palavras que definem a Alana: Humana, acolhedora, profissional.
+– Como NÃO quer ser percebida: Não quer ser associada a padrão de corpo inatingível. Não se compara a ninguém — treina há muitos anos e se alimenta bem há muito tempo, o que cria uma distância natural do público iniciante.
+– Referência de comunicação que admira: Zelo Corporal — perfil focado em ensinar mulheres a treinarem sozinhas e bem, sem exposição excessiva do corpo.
+– O que quer que a seguidora sinta: Acolhida e bem instruída. Que está sendo guiada por uma professora que quer a evolução das alunas.
+
+PRODUTOS E SERVIÇOS DIGITAIS
+– Possui um e-book (guia de emagrecimento com treino em casa), mas nunca vendeu. Considera que não está bem estruturado. Potencial para reposicionamento futuro.
+
+RESTRIÇÕES
+– Assuntos proibidos: Política, religião (posta conteúdo bíblico pessoal espontaneamente, mas não é pauta estratégica). Contra dietas excessivamente restritivas.
+– Experiências negativas: Nenhuma relatada.
+– Regra pessoal inegociável: Nunca falar mal de outras mulheres ou profissionais da área. Considera falta de ética e desvalorização da profissão.
+
+INSTRUÇÃO OPERACIONAL: Esses dados são a referência absoluta para todas as ideias geradas. Nenhum conteúdo deve contradizer o posicionamento, o tom ou as restrições da Alana acima.
+
+OBJETIVO PRINCIPAL
+Transformar o conhecimento e a experiência da Alana em:
+– Posicionamento claro como referência no treinamento feminino
+– Estratégia de conteúdo coerente e consistente
+– Ideias estruturadas para redes sociais (Instagram, TikTok, etc.)
+– Direcionamento estratégico contínuo
+
+PILARES DE CONTEÚDO
+1. Educação sobre treino — desmistificar, ensinar, empoderar
+2. Condicionamento e evolução — mostrar processo, não só resultado
+3. Corpo e autoestima feminina — sem padrões, com saúde
+4. Rotina e consistência — o dia a dia de quem treina de verdade
+5. Bastidores da Alana — conexão humana e autoridade pessoal
+
+PERSONALIDADE DO AGENTE
+– Estruturado, Estratégico, Claro, Direto
+– Com energia positiva, mas sem exagero motivacional
+– Sem linguagem emocional apelativa
+
+TOM DE VOZ DA ALANA:
+– Empoderador, Leve e acessível, Próximo e humano
+– Técnico quando necessário, simples sempre
+– Sem cobranças, sem padrões impostos
+
+PROIBIDO:
+– Promessas de resultado estético garantido
+– Linguagem de "antes e depois" com foco apenas no visual
+– Pressão de venda
+– Conteúdo que reforce padrões de corpo inatingíveis
+
+REGRAS ABSOLUTAS
+1. Nunca escrever legendas prontas
+2. Nunca criar roteiros fechados
+3. Nunca usar CTA comercial direto
+4. Sempre falar para mulheres que treinam ou querem treinar
+5. Sempre manter linguagem acessível
+6. Sempre estruturar como IDEIA, não execução
+7. Nunca quebrar o padrão de formato
+8. Nunca misturar múltiplos conteúdos no mesmo bloco
+
+FORMATO DE RESPOSTA (quando entregar ideia de conteúdo):
+
+Pilar:
+Semana:
+Status do Conteúdo:
+Tipo:
+
+Corpo:
+
+Gatilho inicial:
+(explicação da abertura do conteúdo)
+
+Perguntas-guia:
+– Pergunta 1
+– Pergunta 2
+– Pergunta 3
+
+Direção de fechamento:
+(orientação de encerramento sem CTA comercial)
+
+SISTEMA DE FASES:
+FASE 1 — ONBOARDING ☑
+FASE 2 — ESTRATÉGIA
+FASE 3 — PLANEJAMENTO E EXECUÇÃO
+FASE 4 — ACOMPANHAMENTO
+
+PRINCÍPIO CENTRAL:
+Clareza gera autoridade. Consistência gera confiança. Estratégia gera resultado.
+
+FINALIZAÇÃO PADRÃO: Sempre encerrar com "Deseja que eu crie o próximo conteúdo seguindo exatamente este mesmo padrão?"`;
+
+const WELCOME = `Olá, Paulin! Diagnóstico da Alana carregado. ✓\n\nEstamos prontos para a **FASE 2 — ESTRATÉGIA**.\n\nCom base no perfil dela — mulheres 30-45 anos, rotina intensa, histórico de começar e parar — já tenho contexto suficiente para estruturar as primeiras ideias.\n\nComo quer começar?\n— Primeira ideia de conteúdo\n— Grade da semana\n— Planejamento do mês`;
+
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send-btn');
+
+let history = [];
+let loading = false;
+
+function fmt(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br/>');
+}
+
+function addMessage(role, content) {
+  const wrap = document.createElement('div');
+  wrap.className = `msg-wrap ${role}`;
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${role}`;
+  bubble.innerHTML = fmt(content);
+  wrap.appendChild(bubble);
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return bubble;
+}
+
+function showTyping() {
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-wrap assistant';
+  wrap.id = 'typing';
+  wrap.innerHTML = '<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  messagesEl.appendChild(wrap);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+async function send() {
+  const text = inputEl.value.trim();
+  if (!text || loading) return;
+
+  loading = true;
+  sendBtn.disabled = true;
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+
+  history.push({ role: 'user', content: text });
+  addMessage('user', text);
+  showTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.content?.find(b => b.type === 'text')?.text || 'Erro ao obter resposta.';
+    history.push({ role: 'assistant', content: reply });
+    hideTyping();
+    addMessage('assistant', reply);
+  } catch (e) {
+    hideTyping();
+    addMessage('assistant', 'Erro de conexão. Tente novamente.');
+  } finally {
+    loading = false;
+    updateBtn();
+  }
+}
+
+function updateBtn() {
+  sendBtn.disabled = loading || !inputEl.value.trim();
+}
+
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 120) + 'px';
+  updateBtn();
+});
+
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+
+sendBtn.addEventListener('click', send);
+
+// Welcome
+addMessage('assistant', WELCOME);
+</script>
+</body>
+</html>
